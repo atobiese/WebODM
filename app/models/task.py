@@ -84,39 +84,50 @@ def validate_task_options(value):
 
 def add_xmp(source: str, dest: str):
     """
-
     :param source: absolute name of source image file (string)
     :param dest: absolute name of destination image file (string)
     :return: error message
     """
-    with open(source, 'r+b') as file_1:
-        o_img = file_1.read()
+    # with open(source, 'r+b') as file_1:
+    #     o_img = file_1.read()
+    #
+    #     xmp_start = o_img.find(b'http://ns.adobe.com/xap/1.0/\0')
+    #     xmp_end = o_img.find(b'\xff\xdb', xmp_start)
+    #
+    #     if xmp_start == -1:
+    #         print(f"Warning: There are no XMP data available in the current image: {source}.")
+    #         return False
+    #
+    #     xmp_str = o_img[xmp_start - 4: xmp_end]
+    #
+    # with open(dest, 'r+b') as file_2:
+    #     d_img = file_2.read()
+    #
+    #     xmp_end = d_img.find(b'\xff\xdb')
+    #
+    #     first_part = d_img[:xmp_end]
+    #     second_part = d_img[xmp_end:]
+    #
+    #     new_str = first_part + xmp_str + second_part
+    #
+    #     file_2.seek(0)
+    #     file_2.truncate()
+    #     file_2.write(new_str)
+    #     file_2.close()
+    #
+    # return
 
-        xmp_start = o_img.find(b'http://ns.adobe.com/xap/1.0/\0')
-        xmp_end = o_img.find(b'\xff\xdb', xmp_start)
+    # copy all the metadata (exif + xmp) from the original file to the resized one:
+    cmd = 'exiftool(-k) -TagsFromFile ' + source + ' "-all:all>all:all" ' + dest
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+    stdout, stderr = process.communicate()
+    # exiftool creates a copy of the original file - 'resized.jpg_original',  delete it
+    try:
+        os.remove(dest + "_original")
+    except OSError:
+        pass
 
-        if xmp_start == -1:
-            print(f"Warning: There are no XMP data available in the current image: {source}.")
-            return False
 
-        xmp_str = o_img[xmp_start - 4: xmp_end]
-
-    with open(dest, 'r+b') as file_2:
-        d_img = file_2.read()
-
-        xmp_end = d_img.find(b'\xff\xdb')
-
-        first_part = d_img[:xmp_end]
-        second_part = d_img[xmp_end:]
-
-        new_str = first_part + xmp_str + second_part
-
-        file_2.seek(0)
-        file_2.truncate()
-        file_2.write(new_str)
-        file_2.close()
-
-    return True
 
 def resize_image(image_path, resize_to, done=None):
     """
