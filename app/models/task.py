@@ -84,6 +84,7 @@ def validate_task_options(value):
 
 def add_xmp(source: str, dest: str):
     """
+
     :param source: absolute name of source image file (string)
     :param dest: absolute name of destination image file (string)
     :return: error message
@@ -118,9 +119,18 @@ def add_xmp(source: str, dest: str):
     # return
 
     # copy all the metadata (exif + xmp) from the original file to the resized one:
-    cmd = 'exiftool(-k) -TagsFromFile ' + source + ' "-all:all>all:all" ' + dest
+    # add exif data
+    cmd = 'exiftool(-k) -TagsFromFile ' + source + ' "-xmp" ' + dest
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
     stdout, stderr = process.communicate()
+
+    # add exif data
+    # cmd = 'exiftool(-k) -TagsFromFile ' + source + ' "-all:all>all:all" ' + dest
+    # cmd = 'exiftool(-k) -TagsFromFile ' + source + ' ' + dest
+    # process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+    # stdout, stderr = process.communicate()
+
+
     # exiftool creates a copy of the original file - 'resized.jpg_original',  delete it
     try:
         os.remove(dest + "_original")
